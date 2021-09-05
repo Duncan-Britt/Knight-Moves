@@ -42,12 +42,10 @@ class KnightMovesTest < MiniTest::Test
   end
 
   def test_longer_moves
-    skip
-
     expected = [[0,0],[1,2],[3,3]]
     assert_equal expected, knight_moves([0,0],[3,3])
 
-    expected = [[3,3],[1,2],[0,0]]
+    expected = [[3,3],[2,1],[0,0]]
     assert_equal expected, knight_moves([3,3],[0,0])
   end
 end

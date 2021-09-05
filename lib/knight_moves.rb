@@ -1,20 +1,21 @@
 class Spot
-  attr_reader :data
+  attr_reader :data, :parent
 
-  def initialize(spot)
+  def initialize(spot, parent=nil)
     @data = spot
+    @parent = parent
   end
 
   def adjacents
     [
-      Spot.new([data[0] + 1, data[1] + 2]),
-      Spot.new([data[0] + 2, data[1] + 1]),
-      Spot.new([data[0] + 2, data[1] - 1]),
-      Spot.new([data[0] + 1, data[1] - 2]),
-      Spot.new([data[0] - 1, data[1] - 2]),
-      Spot.new([data[0] - 2, data[1] - 1]),
-      Spot.new([data[0] - 2, data[1] + 1]),
-      Spot.new([data[0] - 1, data[1] + 2])
+      Spot.new([data[0] + 1, data[1] + 2], self),
+      Spot.new([data[0] + 2, data[1] + 1], self),
+      Spot.new([data[0] + 2, data[1] - 1], self),
+      Spot.new([data[0] + 1, data[1] - 2], self),
+      Spot.new([data[0] - 1, data[1] - 2], self),
+      Spot.new([data[0] - 2, data[1] - 1], self),
+      Spot.new([data[0] - 2, data[1] + 1], self),
+      Spot.new([data[0] - 1, data[1] + 2], self)
     ].select { |spot| spot.valid? }
   end
 
@@ -30,33 +31,35 @@ class Spot
   def ==(other)
     data == other.data
   end
+
+  def traverse(end_point)
+    queue = adjacents
+    return [data, end_point.data] if queue.include? end_point
+
+    until queue.include? end_point
+      new_queue = []
+      queue.each do |spot|
+        spot.adjacents.each { |co| new_queue << co }
+      end
+      queue = new_queue
+    end
+
+    found_point = queue.select { |e| e == end_point }.first
+    path = []
+    loop do
+      path.unshift(found_point)
+      break if found_point == self
+      found_point = found_point.parent
+    end
+    path.map { |spot| spot.data }
+  end
 end
 
 def knight_moves(start, finish)
   moves = [start]
   return moves if start == finish
 
-  spot = Spot.new(start)
-  queue = spot.adjacents
-  return moves << finish if queue.include? Spot.new(finish)
-
-  # arr = []
-  # queue.each do |spot|
-  #   adjacent_spots(spot).each { |co| arr << co }
-  # end
-
-  # if arr.include? finish
+  Spot.new(start).traverse(Spot.new(finish))
 end
 
-# def each_level_order
-#   queue = [root]
-#   until queue.include? Spot.new(finish) # THE CONDITION
-#     node = queue.shift
-#     yield(node) if block_given?
-#     if node.one_child?
-#       queue << node.child
-#     elsif !node.leaf?
-#       node.children.each { |e| queue << e }
-#     end
-#   end
-# end
+p knight_moves([0,0], [7,7])
