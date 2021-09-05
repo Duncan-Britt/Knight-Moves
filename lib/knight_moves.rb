@@ -32,19 +32,23 @@ class Spot
     data == other.data
   end
 
+  def find_path(queue, end_point)
+    if queue.include? end_point
+      return queue.select { |e| e == end_point }.first
+    end
+
+    new_queue = []
+    queue.each do |spot|
+      spot.adjacents.each { |co| new_queue << co }
+    end
+    find_path(new_queue, end_point)
+  end
+
   def traverse(end_point)
     queue = adjacents
     return [data, end_point.data] if queue.include? end_point
 
-    until queue.include? end_point
-      new_queue = []
-      queue.each do |spot|
-        spot.adjacents.each { |co| new_queue << co }
-      end
-      queue = new_queue
-    end
-
-    found_point = queue.select { |e| e == end_point }.first
+    found_point = find_path(queue, end_point)
     path = []
     loop do
       path.unshift(found_point)
